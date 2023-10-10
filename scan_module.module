@@ -1,0 +1,34 @@
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function scan_module_node_view(array &$build, EntityInterface $node, EntityViewDisplayInterface $display, $view_mode) {
+  //checking that we are getting the correct content type
+  if ($entity->getEntityTypeId() == 'node' && $entity->getType() == 'blog') { 
+    //we load all the terms from Glossary Term
+    $vid = 'glossary_terms';
+    $terms =\Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree($vid);
+    
+
+    // Get the body text of the blog
+    $body = $entity->body->value
+    
+
+    if (!empty($body)) {
+      $body_text = $body[0]['value'];
+
+      
+      foreach ($terms as $term) {
+        
+        if (strpos($body_text, $term->field_title) !== false) {
+          
+          $description = $term->field_description->value[0]['value'];
+
+          //if the body is not empty and we find a term in the text of the body, we replace the text with html
+          //to showcase a tooltip with the description
+          $body_text = str_replace($term->field_title, "<span class='glossary-term' title='$description'>{$term->field_title}</span>", $body_text);
+        }
+      }
+
+    }
+  }
+}
